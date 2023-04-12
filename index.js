@@ -49,7 +49,7 @@ app.post('/api/register', async (req, res) => {
         res.json(newlyCreatedUser);
     }catch(err){
         console.log(err);
-        res.status(422).json(e)
+        res.status(422).json(err);
     }
 });
 
@@ -76,6 +76,25 @@ app.post('/api/login', async (req, res) => {
         res.status(401).json({message: "User not found"});
     }
 });
+
+//ADMIN ROUTES
+// Email : 200104078@hbtu.ac.in
+// Password : prakhar-tandon
+
+app.post('/api/admin/userlist', async (req,res) => {
+    const token = req.body.cookies;
+    
+    jwt.verify( token, jwtSecret, async (err, adminData) => {
+        if(err) throw err;
+        if(adminData.email === "200104078@hbtu.ac.in" ){
+            res.json( await User.find() );
+        }else{
+            res.status(401).json({message: "You are not an admin"});
+        }
+    });
+
+  });
+  
 
 
 //MONGO DB CONNECTION 
