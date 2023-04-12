@@ -1,9 +1,11 @@
 const express = require('express');
 const app = express();
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
 
 const bcrypt = require('bcryptjs');
 const secretSalt = bcrypt.genSaltSync(10);
+const jwtSecret = "ptofficial29";
 
 //SCHEMAS
 const User = require('./models/User');
@@ -33,6 +35,15 @@ app.post('/api/register', async (req, res) => {
             name,
             email,
             password: bcrypt.hashSync(password, secretSalt),
+            overallGameData:{
+                score:0,
+            },
+            prevGameData:{
+                score:0,
+                time:0,
+                level:0,
+            },
+            avatar:"",
         });
         console.log("User Created: " + newlyCreatedUser);
         res.json(newlyCreatedUser);
@@ -41,6 +52,31 @@ app.post('/api/register', async (req, res) => {
         res.status(422).json(e)
     }
 });
+
+app.post('/api/login', async (req, res) => {
+    const {email, password} = req.body;
+    const userFromDB = await User.findOne( {email} );
+    if(userFromDB){
+        const isPasswordValid = bcrypt.compareSync(password, userFromDB.password);
+
+        if(isPasswordValid){
+
+            jwt.sign({
+                email: userFromDB.email,
+                _id: userFromDB._id,
+            },jwtSecret,{},(err,token)=>{
+                if(err) throw err;
+                res.cookie('token',token).json("Password is valid");
+            });
+
+        }else{
+            res.status(422).json({message: "Invalid Password"});
+        }
+    }else{
+        res.status(401).json({message: "User not found"});
+    }
+});
+
 
 //MONGO DB CONNECTION 
 //Username : ptofficial29
