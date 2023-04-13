@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
-
+const cookieParser = require('cookie-parser');
 const bcrypt = require('bcryptjs');
 const secretSalt = bcrypt.genSaltSync(10);
 const jwtSecret = "ptofficial29";
@@ -13,7 +13,13 @@ const User = require('./models/User');
 require('dotenv').config();
 const PORT = process.env.PORT || 5000;
 app.use(express.json());
-app.use(cors());
+app.use(cookieParser());
+app.use(cors(
+    {
+        credentials: true,
+        origin: 'http://localhost:5173',
+    }
+));
 
 
 // DATABASE CONNECTION
@@ -29,7 +35,7 @@ app.get('/api/test', (req, res) => {
 
 // We'll encrypt the password.
 app.post('/api/register', async (req, res) => {
-    const {name, email, password} = req.body;
+    const {name, email, password,avatar} = req.body;
     try{
         const newlyCreatedUser = await User.create({
             name,
@@ -43,7 +49,7 @@ app.post('/api/register', async (req, res) => {
                 time:0,
                 level:0,
             },
-            avatar:"",
+            avatar:avatar,
         });
         console.log("User Created: " + newlyCreatedUser);
         res.json(newlyCreatedUser);
@@ -56,6 +62,16 @@ app.post('/api/register', async (req, res) => {
 app.post('/api/login', async (req, res) => {
     const {email, password} = req.body;
     const userFromDB = await User.findOne( {email} );
+    const isAdmin = userFromDB.email === "200104078@hbtu.ac.in" ? true : false;
+    const userData = {
+        email: userFromDB.email,
+        _id: userFromDB._id,
+        isAdmin: isAdmin,
+        avatar: userFromDB.avatar,
+        overallGameData: userFromDB.overallGameData,
+        prevGameData: userFromDB.prevGameData,
+        name: userFromDB.name,
+    }
     if(userFromDB){
         const isPasswordValid = bcrypt.compareSync(password, userFromDB.password);
 
@@ -66,7 +82,7 @@ app.post('/api/login', async (req, res) => {
                 _id: userFromDB._id,
             },jwtSecret,{},(err,token)=>{
                 if(err) throw err;
-                res.cookie('token',token).json("Password is valid");
+                res.cookie('token',token).status(200).json(userData);
             });
 
         }else{
@@ -77,21 +93,75 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
+//leaderboard
+app.get('/api/leaderboard', async (req, res) => {
+    const {token} = req.cookies;
+    if(token){
+        jwt.verify( token, jwtSecret, async (err, userData) => {
+            if(err) throw err;
+            console.log("User Verified");
+            const users = await User.find();
+            const sortedUsers = users.sort((a,b) => b.overallGameData.score - a.overallGameData.score);
+            res.json(sortedUsers);
+        });
+    }else{
+        res.status(401).json({message: "You are not logged in"});
+    }
+});
+
+// auto login
+app.get('/api/autologin', async (req, res) => {
+    const {token} = req.cookies;
+    if(token && token !== ''){
+        jwt.verify( token, jwtSecret, async (err, userData) => {
+            if(err) throw err;
+            console.log("User Verified");
+            const userFromDB = await User.findOne( {_id: userData._id} );
+            const isAdmin = userFromDB.email === "200104078@hbtu.ac.in" ? true : false;
+            const userDataAuto = {
+                email: userFromDB.email,
+                _id: userFromDB._id,
+                isAdmin: isAdmin,
+                avatar: userFromDB.avatar,
+                overallGameData: userFromDB.overallGameData,
+                prevGameData: userFromDB.prevGameData,
+                name: userFromDB.name,
+            }
+            res.status(200).json(userDataAuto);
+        });
+    }else{
+        res.status(401).json({message: "You are not logged in"});
+    }
+});
+
+
+//Logout
+app.post('/api/logout', (req,res) => {
+    res.cookie('token', '').json(true);
+  });
+
+
 //ADMIN ROUTES
 // Email : 200104078@hbtu.ac.in
 // Password : prakhar-tandon
 
 app.post('/api/admin/userlist', async (req,res) => {
-    const token = req.body.cookies;
+    const email = req.body.email;
     
-    jwt.verify( token, jwtSecret, async (err, adminData) => {
-        if(err) throw err;
-        if(adminData.email === "200104078@hbtu.ac.in" ){
-            res.json( await User.find() );
-        }else{
-            res.status(401).json({message: "You are not an admin"});
-        }
-    });
+    // jwt.verify( token, jwtSecret, async (err, adminData) => {
+    //     if(err) throw err;
+    //     if(adminData.email === "200104078@hbtu.ac.in" ){
+    //         res.json( await User.find() );
+    //     }else{
+    //         res.status(401).json({message: "You are not an admin"});
+    //     }
+    // });
+
+    if(email === "200104078@hbtu.ac.in"){
+        res.json( await User.find() ); 
+    }else{
+        res.status(401).json({message: "You are not an admin"});
+    }
 
   });
   
