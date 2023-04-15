@@ -82,7 +82,10 @@ app.post('/api/login', async (req, res) => {
                 _id: userFromDB._id,
             },jwtSecret,{},(err,token)=>{
                 if(err) throw err;
-                res.cookie('token',token).status(200).json(userData);
+                res.cookie('token',token,{
+                    httpOnly: true,
+                    maxAge: 1000 * 60 * 60 * 24 * 2, // 2 day
+                }).status(200).json(userData);
             });
 
         }else{
