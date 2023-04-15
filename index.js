@@ -96,6 +96,33 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
+// Update User Data
+app.post('/api/update', async (req, res) => {
+    const {level,score,time} = req.body;
+    const {token} = req.cookies;
+    if(token){
+        jwt.verify( token, jwtSecret, async (err, userData) => {
+            if(err) throw err;
+            console.log("User Verified");
+            const userFromDB = await User.findOne( {_id: userData._id} );
+            userFromDB.overallGameData = {
+                score: (userFromDB.overallGameData.score < score) ? score : userFromDB.overallGameData.score,
+            };
+            userFromDB.prevGameData = {
+                level:level,
+                score:score,
+                time:time,
+            };
+            await userFromDB.save();
+            res.json(userFromDB);
+        });
+    }else{
+        res.status(401).json({message: "You are not logged in"});
+    }
+});
+
+
+
 //leaderboard
 app.get('/api/leaderboard', async (req, res) => {
     const {token} = req.cookies;
