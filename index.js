@@ -19,6 +19,7 @@ app.use(cors(
         credentials: true,
         origin: 'https://prakhar-puzzle-game.netlify.app',
         sameSite: 'none',
+        secure: true,
     }
 ));
 
