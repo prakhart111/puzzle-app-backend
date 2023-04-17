@@ -86,8 +86,10 @@ app.post('/api/login', async (req, res) => {
             },jwtSecret,{},(err,token)=>{
                 if(err) throw err;
                 res.cookie('token',token,{
-                    httpOnly: true,
                     maxAge: 1000 * 60 * 60 * 24 * 2, // 2 day
+                    httpOnly:false,
+                    sameSite: 'none',
+                    secure: true,
                 }).status(200).json(userData);
             });
 
