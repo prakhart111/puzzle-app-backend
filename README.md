@@ -1,3 +1,10 @@
+# Deployed URLs
+- Frontend : https://prakhar-puzzle-game.netlify.app
+- Backend : https://shy-pear-ant-garb.cyclic.app/api/test
+
+## THE COOKIE ISSUE HAS BEEN FIXED NOW
+## DEPLOYED APPLICATION WORKS PERFECTLY FINE 
+
 ## Frontend Repo : https://github.com/prakhart111/puzzle-app-frontend 
 ## Backend Repo: https://github.com/prakhart111/puzzle-app-backend
 # Game Specifications
