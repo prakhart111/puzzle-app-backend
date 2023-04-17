@@ -169,7 +169,11 @@ app.get('/api/autologin', async (req, res) => {
 
 //Logout
 app.post('/api/logout', (req,res) => {
-    res.cookie('token', '').json(true);
+    res.cookie('token', '', {
+          httpOnly:false,
+          sameSite: 'none',
+          secure: true,}
+        ).json(true);
   });
 
 
