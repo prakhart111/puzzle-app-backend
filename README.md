@@ -1,5 +1,5 @@
-- Frontend Repo : https://github.com/prakhart111/puzzle-app-frontend 
-- Backend Repo: https://github.com/prakhart111/puzzle-app-backend
+## Frontend Repo : https://github.com/prakhart111/puzzle-app-frontend 
+## Backend Repo: https://github.com/prakhart111/puzzle-app-backend
 # Game Specifications
 - 6 Levels
 - Correct answer = +10
