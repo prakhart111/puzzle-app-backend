@@ -203,8 +203,6 @@ app.post('/api/admin/userlist', async (req,res) => {
   
 
 
-//MONGO DB CONNECTION 
-//Username : ptofficial29
-//PASSWORD : F3hjG5zdLOWrJvcP
+
 
 app.listen(PORT)
